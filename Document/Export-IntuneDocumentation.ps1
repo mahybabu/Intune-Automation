@@ -17,10 +17,17 @@ Param (
 Import-Module PSWriteExcel
 $Excel = New-ExcelDocument
 
-# Read Intune device configuration policies
-$configs = Get-IntuneDeviceConfigurationPolicy
+$objects = @('Get-IntuneDeviceConfigurationPolicy', `
+        'Get-IntuneDeviceCompliancePolicy', `
+        'Get-IntuneWindowsInformationProtectionPolicy', `
+        'Get-IntuneAppProtectionPolicy')
 
-# 
+# Read Intune device configuration policies
+ForEach ($object in $objects) {
+    $configs += Invoke-Expression $object
+}
+
+# Convert each configuration and add to an Excel worksheet
 ForEach ($config in $configs) {
 
     # Convert the PSCustomObject to a hashtable 
