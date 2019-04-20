@@ -108,17 +108,75 @@ $IntuneWin32PackagingTool = Get-IntuneWin32PackagingTool -DownloadPath "$env:Tem
 
 # Package the VcRedists
 New-Item -Path "$Path\Packages" -ItemType Directory | Out-Null
-ForEach ($vc in $VcRedists) {
+ForEach ($vcRedist in $VcRedists) {
 
     # Paths
-    $folder = Join-Path (Join-Path (Join-Path $(Resolve-Path -Path "$Path\VcRedists") $vc.Release) $vc.Architecture) $vc.ShortName
-    $filename = Join-Path $folder $(Split-Path -Path $vc.Download -Leaf)
-    $output = Join-Path (Join-Path (Join-Path $(Resolve-Path -Path "$Path\Packages") $vc.Release) $vc.Architecture) $vc.ShortName
+    $folder = Join-Path (Join-Path (Join-Path $(Resolve-Path -Path "$Path\VcRedists") $vcRedist.Release) $vcRedist.Architecture) $vcRedist.ShortName
+    $filename = Join-Path $folder $(Split-Path -Path $vcRedist.Download -Leaf)
+    $output = Join-Path (Join-Path (Join-Path $(Resolve-Path -Path "$Path\Packages") $vcRedist.Release) $vcRedist.Architecture) $vcRedist.ShortName
     New-Item -Path $output -ItemType Directory | Out-Null
 
     # Package
     If (Test-Path -Path $filename) {
-        Write-Verbose "Package: [$($vc.Architecture)]$($vc.Name)"
+        Write-Verbose "Package: [$($vcRedist.Architecture)]$($vcRedist.Name)"
         . $IntuneWin32PackagingTool -c $folder -s $filename -o $output
+        $intunePackage = Get-ChildItem -Path $output -Include "*.intunewin" -Recurse | Sort-Object -Property CreationTime -Descending | Select-Object -First 1
+
+        # Create the request body
+        $requestBody = @{
+            "@odata.type"                     = "#microsoft.graph.win32LobApp"
+            "displayName"                     = "Microsoft $($vcRedist.Name) $($vcRedist.Architecture)"
+            "description"                     = "Microsoft $($vcRedist.Name) $($vcRedist.Architecture)"
+            "publisher"                       = "Microsoft"
+            "largeIcon"                       = @{ }
+            "isFeatured"                      = "false"
+            "privacyInformationUrl"           = "https://privacy.microsoft.com/en-us/privacystatement/"
+            "informationUrl"                  = $vcRedist.Url
+            "owner"                           = "Microsoft"
+            "developer"                       = "Microsoft"
+            "notes"                           = "Microsoft $($vcRedist.Name) $($vcRedist.Architecture)"
+            # "uploadState"                     = 11
+            # "publishingState"                 = "processing"
+            "isAssigned"                      = "false"
+            # "dependentAppCount"               = 1
+            "committedContentVersion"         = "1"
+            "fileName"                        = $intunePackage.FullName
+            # "size"                            = 4
+            "installCommandLine"              = "$(Split-Path -Path $vcRedist.Download -Leaf) $($vcRedist.SilentInstall)"
+            "uninstallCommandLine"            = "msiexec /X$($vcRedist.ProductCode) /qn-"
+            "applicableArchitectures"         = If ($vcRedist.Architecture -eq "x86") { "x86, x64" } Else { "x64" }
+            "minimumSupportedOperatingSystem" = @{
+                "v8_0"     = "false"
+                "v8_1"     = "false"
+                "v10_0"    = "false"
+                "v10_1607" = "true"
+                "v10_1703" = "false"
+                "v10_1709" = "false"
+                "v10_1803" = "false"
+            }
+            "minimumFreeDiskSpaceInMB"        = 200
+            "minimumMemoryInMB"               = 4
+            "minimumNumberOfProcessors"       = 1
+            "minimumCpuSpeedInMHz"            = 1000
+            "detectionRules"                  = @{
+                "@odata.type"            = "#microsoft.graph.win32LobAppProductCodeDetection"
+                "productCode"            = $vcRedist.ProductCode
+                "productVersionOperator" = "notConfigured"
+                "productVersion"         = $Null
+            }
+            "requirementRules"                = @{ }
+            "installExperience"               = @{
+                "runAsAccount" = "system"
+            }
+            # "returnCodes"                     = @{ }
+            # "msiInformation"                  = @{ }
+            "setupFilePath"                   = $(Split-Path -Path $vcRedist.Download -Leaf)
+        }
+
+        # Create the application
+        Invoke-MSGraphRequest -HttpMethod POST -Url 'deviceAppManagement/mobileApps' -Content $requestBody -Headers @{"Accept" = "application/json"}
+
+        # Invoke-RestMethod -Uri "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps/" -Method "POST" `
+        #    -Headers @{"Authorization" = $token.Authorization; "Accept" = "application/json"} -Body ($requestBody | ConvertTo-Json)
     }
 }
