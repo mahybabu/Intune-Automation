@@ -1,0 +1,88 @@
+{
+  "@odata.type": "#microsoft.graph.win32LobApp",
+  "displayName": "Display Name value",
+  "description": "Description value",
+  "publisher": "Publisher value",
+  "largeIcon": {
+    "@odata.type": "microsoft.graph.mimeContent",
+    "type": "Type value",
+    "value": "dmFsdWU="
+  },
+  "isFeatured": true,
+  "privacyInformationUrl": "https://example.com/privacyInformationUrl/",
+  "informationUrl": "https://example.com/informationUrl/",
+  "owner": "Owner value",
+  "developer": "Developer value",
+  "notes": "Notes value",
+  "uploadState": 11,
+  "publishingState": "processing",
+  "isAssigned": true,
+  "roleScopeTagIds": [
+    "Role Scope Tag Ids value"
+  ],
+  "dependentAppCount": 1,
+  "committedContentVersion": "Committed Content Version value",
+  "fileName": "File Name value",
+  "size": 4,
+  "installCommandLine": "Install Command Line value",
+  "uninstallCommandLine": "Uninstall Command Line value",
+  "applicableArchitectures": "x86",
+  "minimumSupportedOperatingSystem": {
+    "@odata.type": "microsoft.graph.windowsMinimumOperatingSystem",
+    "v8_0": true,
+    "v8_1": true,
+    "v10_0": true,
+    "v10_1607": true,
+    "v10_1703": true,
+    "v10_1709": true,
+    "v10_1803": true
+  },
+  "minimumFreeDiskSpaceInMB": 8,
+  "minimumMemoryInMB": 1,
+  "minimumNumberOfProcessors": 9,
+  "minimumCpuSpeedInMHz": 4,
+  "detectionRules": [
+    {
+      "@odata.type": "microsoft.graph.win32LobAppRegistryDetection",
+      "check32BitOn64System": true,
+      "keyPath": "Key Path value",
+      "valueName": "Value Name value",
+      "detectionType": "exists",
+      "operator": "equal",
+      "detectionValue": "Detection Value value"
+    }
+  ],
+  "requirementRules": [
+    {
+      "@odata.type": "microsoft.graph.win32LobAppRegistryRequirement",
+      "operator": "equal",
+      "detectionValue": "Detection Value value",
+      "check32BitOn64System": true,
+      "keyPath": "Key Path value",
+      "valueName": "Value Name value",
+      "detectionType": "exists"
+    }
+  ],
+  "installExperience": {
+    "@odata.type": "microsoft.graph.win32LobAppInstallExperience",
+    "runAsAccount": "user"
+  },
+  "returnCodes": [
+    {
+      "@odata.type": "microsoft.graph.win32LobAppReturnCode",
+      "returnCode": 10,
+      "type": "success"
+    }
+  ],
+  "msiInformation": {
+    "@odata.type": "microsoft.graph.win32LobAppMsiInformation",
+    "productCode": "Product Code value",
+    "productVersion": "Product Version value",
+    "upgradeCode": "Upgrade Code value",
+    "requiresReboot": true,
+    "packageType": "perUser",
+    "productName": "Product Name value",
+    "publisher": "Publisher value"
+  },
+  "setupFilePath": "Setup File Path value"
+}
