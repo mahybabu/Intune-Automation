@@ -78,7 +78,7 @@ Function Get-IntuneWin32PackagingTool {
     }
     finally {
         Write-Verbose -Message "Extracting $releaseZip."
-        Expand-Archive -LiteralPath $releaseZip -DestinationPath $ExtractPath
+        Expand-Archive -LiteralPath $releaseZip -DestinationPath $ExtractPath -Force
     }
 
     # Return the Intune Win32 Packaging Tool to the pipeline
@@ -88,6 +88,17 @@ Function Get-IntuneWin32PackagingTool {
 }
 #endregion
 
+#region Test environment
+Try {
+    Get-IntuneDeviceManagement -ErrorAction SilentlyContinue | Out-Null
+}
+Catch {
+    Throw "Failed to find MSGraph connection. Please sign in first with Connect-MSGraph."
+    Break
+}
+#endregion
+
+#region Package
 # Create $Path if it does not exist
 If (Test-Path -Path $Path) {
     Write-Verbose -Message "Path exists: $Path"
@@ -176,7 +187,12 @@ ForEach ($vcRedist in $VcRedists) {
         # Create the application
         Invoke-MSGraphRequest -HttpMethod POST -Url 'deviceAppManagement/mobileApps' -Content $requestBody -Headers @{"Accept" = "application/json"}
 
-        # Invoke-RestMethod -Uri "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps/" -Method "POST" `
-        #    -Headers @{"Authorization" = $token.Authorization; "Accept" = "application/json"} -Body ($requestBody | ConvertTo-Json)
+        <# REST method approach
+        . .\Get-AuthToken.ps1
+        $token = Get-AuthToken
+        Invoke-RestMethod -Uri "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps/" -Method "POST" `
+            -Headers @{"Authorization" = $token.Authorization; "Accept" = "application/json"} -Body ($requestBody | ConvertTo-Json)
+        #>
     }
 }
+#endregion
