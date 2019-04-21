@@ -157,13 +157,14 @@ ForEach ($vcRedist in $VcRedists) {
             "uninstallCommandLine"            = "msiexec /X$($vcRedist.ProductCode) /qn-"
             "applicableArchitectures"         = If ($vcRedist.Architecture -eq "x86") { "x86, x64" } Else { "x64" }
             "minimumSupportedOperatingSystem" = @{
-                "v8_0"     = "false"
-                "v8_1"     = "false"
-                "v10_0"    = "false"
-                "v10_1607" = "true"
-                "v10_1703" = "false"
-                "v10_1709" = "false"
-                "v10_1803" = "false"
+                "@odata.type" = "#microsoft.graph.windowsMinimumOperatingSystem"
+                "v8_0"        = "false"
+                "v8_1"        = "false"
+                "v10_0"       = "false"
+                "v10_1607"    = "true"
+                "v10_1703"    = "false"
+                "v10_1709"    = "false"
+                "v10_1803"    = "false"
             }
             "minimumFreeDiskSpaceInMB"        = 200
             "minimumMemoryInMB"               = 4
@@ -177,6 +178,7 @@ ForEach ($vcRedist in $VcRedists) {
             }
             "requirementRules"                = @{ }
             "installExperience"               = @{
+                "@odata.type"  = "#microsoft.graph.win32LobAppInstallExperience"
                 "runAsAccount" = "system"
             }
             # "returnCodes"                     = @{ }
@@ -185,7 +187,7 @@ ForEach ($vcRedist in $VcRedists) {
         }
 
         # Create the application
-        Invoke-MSGraphRequest -HttpMethod POST -Url 'deviceAppManagement/mobileApps' -Content $requestBody -Headers @{"Accept" = "application/json"}
+        Invoke-MSGraphRequest -HttpMethod POST -Url 'deviceAppManagement/mobileApps' -Content $requestBody -Headers @{"Accept" = "application/json" }
 
         <# REST method approach
         . .\Get-AuthToken.ps1
