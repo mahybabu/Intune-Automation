@@ -54,8 +54,7 @@ Function Get-IntuneWin32PackagingTool {
     )
 
     # Get the latest Intune PowerShell SDK
-    $latestRelease = (Invoke-Webrequest -uri https://api.github.com/repos/Microsoft/Intune-Win32-App-Packaging-Tool/releases -UseBasicParsing `
-        | ConvertFrom-Json)[0]
+    $latestRelease = (Invoke-Webrequest -uri https://api.github.com/repos/Microsoft/Intune-Win32-App-Packaging-Tool/releases -UseBasicParsing | ConvertFrom-Json)[0]
 
     # Return the latest version tag
     $latestVersion = $latestRelease.tag_name
@@ -70,6 +69,8 @@ Function Get-IntuneWin32PackagingTool {
         If (!(Test-Path -path $releaseZip)) {
             Write-Verbose -Message "Downloading $($latestRelease.zipball_url) to $releaseZip."
             Invoke-WebRequest -Uri $latestRelease.zipball_url -OutFile $releaseZip
+            # https://github.com/microsoft/Intune-Win32-App-Packaging-Tool/releases/tag/v1.4
+            # https://github.com/microsoft/Intune-Win32-App-Packaging-Tool/archive/v1.4.zip
         }
     }
     catch {
@@ -139,62 +140,59 @@ ForEach ($vcRedist in $VcRedists) {
             "displayName"                     = "Microsoft $($vcRedist.Name) $($vcRedist.Architecture)"
             "description"                     = "Microsoft $($vcRedist.Name) $($vcRedist.Architecture)"
             "publisher"                       = "Microsoft"
-            "largeIcon"                       = @{ }
             "isFeatured"                      = "false"
             "privacyInformationUrl"           = "https://privacy.microsoft.com/en-us/privacystatement/"
             "informationUrl"                  = $vcRedist.Url
             "owner"                           = "Microsoft"
             "developer"                       = "Microsoft"
             "notes"                           = "Microsoft $($vcRedist.Name) $($vcRedist.Architecture)"
-            # "uploadState"                     = 11
-            # "publishingState"                 = "processing"
             "isAssigned"                      = "false"
-            # "dependentAppCount"               = 1
             "committedContentVersion"         = "1"
             "fileName"                        = $intunePackage.FullName
-            # "size"                            = 4
             "installCommandLine"              = "$(Split-Path -Path $vcRedist.Download -Leaf) $($vcRedist.SilentInstall)"
             "uninstallCommandLine"            = "msiexec /X$($vcRedist.ProductCode) /qn-"
             "applicableArchitectures"         = If ($vcRedist.Architecture -eq "x86") { "x86, x64" } Else { "x64" }
             "minimumSupportedOperatingSystem" = @{
-                "@odata.type" = "#microsoft.graph.windowsMinimumOperatingSystem"
-                "v8_0"        = "false"
-                "v8_1"        = "false"
-                "v10_0"       = "false"
-                "v10_1607"    = "true"
-                "v10_1703"    = "false"
-                "v10_1709"    = "false"
-                "v10_1803"    = "false"
+                # "@odata.type" = "#microsoft.graph.windowsMinimumOperatingSystem"
+                "v8_0"     = "false"
+                "v8_1"     = "false"
+                "v10_0"    = "false"
+                "v10_1607" = "true"
+                "v10_1703" = "false"
+                "v10_1709" = "false"
+                "v10_1803" = "false"
             }
             "minimumFreeDiskSpaceInMB"        = 200
             "minimumMemoryInMB"               = 4
             "minimumNumberOfProcessors"       = 1
             "minimumCpuSpeedInMHz"            = 1000
-            "detectionRules"                  = @{
-                "@odata.type"            = "#microsoft.graph.win32LobAppProductCodeDetection"
-                "productCode"            = $vcRedist.ProductCode
-                "productVersionOperator" = "notConfigured"
-                "productVersion"         = $Null
-            }
-            "requirementRules"                = @{ }
+            "detectionRules"                  = @( @{
+                    "@odata.type"            = "#microsoft.graph.win32LobAppProductCodeDetection"
+                    "productCode"            = $vcRedist.ProductCode
+                    "productVersionOperator" = "notConfigured"
+                    "productVersion"         = $Null
+                })
+            
             "installExperience"               = @{
-                "@odata.type"  = "#microsoft.graph.win32LobAppInstallExperience"
+                # "@odata.type"  = "#microsoft.graph.win32LobAppInstallExperience"
                 "runAsAccount" = "system"
             }
-            # "returnCodes"                     = @{ }
+            
+            # "setupFilePath"                   = $(Split-Path -Path $vcRedist.Download -Leaf)
+            "setupFilePath"                   = "vc_redistx86.exe"
+            # "largeIcon"                       = @{ }
+            # "returnCodes"                     = @(@{ })
             # "msiInformation"                  = @{ }
-            "setupFilePath"                   = $(Split-Path -Path $vcRedist.Download -Leaf)
+            # "requirementRules"                = @(@{ })
+            # "uploadState"                     = 11
+            # "publishingState"                 = "processing"
+            # "dependentAppCount"               = 1
+            # "size"                            = 4
         }
 
         # Create the application
-        Invoke-MSGraphRequest -HttpMethod POST -Url 'deviceAppManagement/mobileApps' -Content $requestBody -Headers @{"Accept" = "application/json" }
-
-        <# REST method approach
-        . .\Get-AuthToken.ps1
-        $token = Get-AuthToken
-        Invoke-RestMethod -Uri "https://graph.microsoft.com/beta/deviceAppManagement/mobileApps/" -Method "POST" `
-            -Headers @{"Authorization" = $token.Authorization; "Accept" = "application/json"} -Body ($requestBody | ConvertTo-Json)
-        #>
+        $app = Invoke-MSGraphRequest -HttpMethod POST -Url "deviceAppManagement/mobileApps" -Content $requestBody -Headers @{"Accept" = "application/json" }
+        New-LobApp -filePath $intunePackage.FullName -mobileApp $app
     }
 }
 #endregion
