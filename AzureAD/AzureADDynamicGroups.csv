@@ -4,18 +4,21 @@ DeviceCollection-Personal,"(device.deviceOwnership -eq ""Personal"")",Personally
 DeviceCollection-Disabled,(device.accountEnabled -eq False),Disabled devices.
 DeviceCollection-Surface,"(device.deviceModel -startsWith ""Surface"")",Microsoft Surface devices.
 DeviceCollection-Lenovo,"(device.deviceManufacturer -startsWith ""LENOVO"")",Lenovo desktops and laptops.
+DeviceCollection-LenovoCorporate,"(device.deviceOwnership -eq ""Company"") -and (device.deviceManufacturer -startsWith ""LENOVO"")",All corporate Lenovo devices
 DeviceCollection-HP,"(device.deviceManufacturer -startsWith ""HP"")",HP desktops and laptops.
+DeviceCollection-HPCorporate,"(device.deviceOwnership -eq ""Company"") -and (device.deviceManufacturer -startsWith ""HP"")",All corporate HP devices
 DeviceCollection-Dell,"(device.deviceManufacturer -startsWith ""Dell"")",Dell desktops and laptops.
-DeviceCollection-Asus,"(device.deviceManufacturer -startsWith ""ASUS"")",Asus desktops and laptops.
-DeviceCollection-Acer,"(device.deviceManufacturer -startsWith ""Acer"")",Acer desktops and laptops.
+DeviceCollection-DellCorporate,"(device.deviceOwnership -eq ""Company"") -and (device.deviceManufacturer -startsWith ""Dell"")",All corporate Dell devices
 DeviceCollection-Samsung,"(device.deviceManufacturer -startsWith ""Samsung"")",Samsung PCs and mobile devices.
+DeviceCollection-SamsungCorporate,"(device.deviceOwnership -eq ""Company"") -and (device.deviceManufacturer -startsWith ""Samsung"")",All corporate Samsung devices
 DeviceCollection-Apple,"(device.deviceManufacturer -startsWith ""Apple"")",All Apple devices.
+DeviceCollection-AppleCorporate,"(device.deviceOwnership -eq ""Company"") -and (device.deviceManufacturer -startsWith ""Apple"")",All corporate Apple devices
 DeviceCollection-Google,"(device.deviceManufacturer -startsWith ""Google"")",Google tablets and phones
 DeviceCollection-VirtualMachine,"(device.deviceManufacturer -startsWith ""Parallels"") -or (device.deviceManufacturer -startsWith ""VMware"") -or (device.deviceModel -eq ""Virtual Machine"") -or (device.deviceModel -eq ""VirtualBox"")",Virtual machines.
 DeviceCollection-Android,"(device.deviceOSType -startsWith ""Android"")",Android phones and tablets.
 DeviceCollection-iOS,"(device.deviceOSType -startsWith ""iPhone"") -or (device.deviceOSType -startsWith ""iPad"")",Apple iPhones and iPads.
 DeviceCollection-macOS,"(device.deviceOSType -startsWith ""Mac"")",Apple Macs and MacBooks.
 DeviceCollection-Windows,"(device.deviceOSType -startsWith ""Windows"")",All Windows devices.
+DeviceCollection-WindowsCorporate,"(device.deviceOwnership -eq ""Company"") -and (device.deviceOSType -startsWith ""Windows"")",All corporate Windows devices
 DeviceCollection-AutoPilotEnabledDevices,"(device.devicePhysicalIDs -any _ -contains ""[ZTDId]"")",All Windows AutoPilot enabled devices.
-DeviceCollection-AutoPilotStandardProfile,"(device.enrollmentProfileName -eq ""Standard users"")",Devices assigned the Standard users AutoPilot profile.
-DeviceCollection-AutoPilotAdminProfile,"(device.enrollmentProfileName -eq ""Admin users"")",Devices assigned the Admin users AutoPilot profile.
+DeviceCollection-AutoPilotStandardProfile,"(device.enrollmentProfileName -eq ""Standard users"")",(Example) Devices assigned the Standard users AutoPilot profile.
